@@ -1,0 +1,25 @@
+name: Build Docker Image
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: centos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Pull Docker Image with Digest
+        run: |
+          # 拉取指定 Tag 和 Digest 的镜像
+          docker pull starrocks/artifacts-centos7:3.4.1@sha256-e00886b5fccf4c4cdd50f1b9d126c9c4dc983d7d450f0f1894d3c277130fd288
+          # 验证 Digest 是否匹配
+          docker inspect --format='{{index .RepoDigests 0}}' starrocks/artifacts-centos7:3.4.1
+
+      - name: Save Docker Image
+        run: |
+          docker save -o artifacts-centos7-3.4.1.tar starrocks/artifacts-centos7:3.4.1
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: starrocks-centos7-image
+          path: artifacts-centos7-3.4.1.tar
